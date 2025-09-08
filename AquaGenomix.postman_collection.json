@@ -1,0 +1,87 @@
+{
+  "info": {
+    "name": "AquaGenomix API Test",
+    "_postman_id": "12345678-1234-1234-1234-123456789abc",
+    "description": "Test AquaGenomix backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [                        
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload DNA Sequence File",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/analysis/upload",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "analysis", "upload"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Analysis Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/analysis/{{analysis_id}}/status",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "analysis", "{{analysis_id}}", "status"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Analysis Result",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/analysis/{{analysis_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "analysis", "{{analysis_id}}"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "analysis_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
