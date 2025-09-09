@@ -42,8 +42,8 @@ async function predictBatch(sequences) {
     });
 
     console.log('Batch prediction successful.');
-    console.log('Response data:', response.data);
-    return response.data;
+    // Correctly return the nested 'predictions' array
+    return response.data.predictions;
 
   } catch (batchError) {
     console.error('Batch prediction failed:', batchError.message);
@@ -71,7 +71,6 @@ async function predictBatch(sequences) {
         });
       }
     }
-  
     return results;
   }
 }

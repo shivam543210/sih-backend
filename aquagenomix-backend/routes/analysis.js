@@ -69,12 +69,12 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       });
 
       // Calculate summary
-     const validResults = updatedSequences.filter(seq => seq.result && typeof seq.result.confidence === 'number');
-const speciesFound = [...new Set(validResults.map(seq => seq.result.species))];
-let avgConfidence = 0;
-if (validResults.length > 0) {
-    avgConfidence = validResults.reduce((sum, seq) => sum + seq.result.confidence, 0) / validResults.length;
-}
+      const validResults = updatedSequences.filter(seq => seq.result && typeof seq.result.confidence === 'number');
+      const speciesFound = [...new Set(validResults.map(seq => seq.result.species))];
+      let avgConfidence = 0;
+      if (validResults.length > 0) {
+        avgConfidence = validResults.reduce((sum, seq) => sum + seq.result.confidence, 0) / validResults.length;
+      }
 
       // Update analysis
       analysis.sequences = updatedSequences;
