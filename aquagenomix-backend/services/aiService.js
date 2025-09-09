@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const AI_MODEL_URL = 'http://localhost:8000';
+const AI_MODEL_URL = 'https://sih-yvgi.onrender.com';
 
 async function predictSingle(sequence, sequenceId) {
   try {
@@ -42,6 +42,7 @@ async function predictBatch(sequences) {
     });
 
     console.log('Batch prediction successful.');
+    console.log('Response data:', response.data);
     return response.data;
 
   } catch (batchError) {
@@ -70,6 +71,7 @@ async function predictBatch(sequences) {
         });
       }
     }
+  
     return results;
   }
 }
