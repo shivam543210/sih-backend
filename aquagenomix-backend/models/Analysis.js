@@ -13,6 +13,8 @@ const sequenceSchema = new mongoose.Schema({
 });
 
 const analysisSchema = new mongoose.Schema({
+  projectName: { type: String, required: true },
+  projectDescription: { type: String, required: true },
   fileName: String,
   fileSize: Number,
   uploadDate: { type: Date, default: Date.now },

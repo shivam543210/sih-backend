@@ -1,0 +1,329 @@
+{
+	"info": {
+		"_postman_id": "YOUR-POSTMAN-ID",
+		"name": "AquaGenomix API Tests",
+		"description": "Test collection for AquaGenomix API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Upload Analysis",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('analysis_id');",
+							"    pm.expect(responseData).to.have.property('status');",
+							"    pm.expect(responseData).to.have.property('message');",
+							"    pm.expect(responseData).to.have.property('summary');",
+							"",
+							"    // Save analysis_id for other requests",
+							"    pm.environment.set(\"analysis_id\", responseData.analysis_id);",
+							"});",
+							"",
+							"pm.test(\"Project details are correct\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData.status).to.eql('completed');",
+							"    pm.expect(responseData.message).to.eql('Analysis completed successfully');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/path/to/your/test.fasta"
+						},
+						{
+							"key": "projectName",
+							"value": "Test Project",
+							"type": "text"
+						},
+						{
+							"key": "projectDescription",
+							"value": "Test project description for API validation",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/analysis/upload",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "upload"]
+				}
+			}
+		},
+		{
+			"name": "Get Analysis By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Analysis details are complete\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('projectName');",
+							"    pm.expect(responseData).to.have.property('projectDescription');",
+							"    pm.expect(responseData).to.have.property('fileName');",
+							"    pm.expect(responseData).to.have.property('status');",
+							"    pm.expect(responseData).to.have.property('sequences');",
+							"    pm.expect(responseData).to.have.property('summary');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/analysis/{{analysis_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "{{analysis_id}}"]
+				}
+			}
+		},
+		{
+			"name": "Get Analysis Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('status');",
+							"    pm.expect(responseData).to.have.property('summary');",
+							"    ",
+							"    // Status should be one of the allowed values",
+							"    pm.expect(['processing', 'completed', 'failed']).to.include(responseData.status);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/analysis/{{analysis_id}}/status",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "{{analysis_id}}", "status"]
+				}
+			}
+		},
+		{
+			"name": "List Analyses (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Pagination details are present\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('analyses');",
+							"    pm.expect(responseData).to.have.property('pagination');",
+							"    ",
+							"    const pagination = responseData.pagination;",
+							"    pm.expect(pagination).to.have.property('currentPage');",
+							"    pm.expect(pagination).to.have.property('totalPages');",
+							"    pm.expect(pagination).to.have.property('totalItems');",
+							"    pm.expect(pagination).to.have.property('itemsPerPage');",
+							"});",
+							"",
+							"pm.test(\"Analyses contain required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const analyses = responseData.analyses;",
+							"    ",
+							"    pm.expect(analyses).to.be.an('array');",
+							"    if (analyses.length > 0) {",
+							"        const firstAnalysis = analyses[0];",
+							"        pm.expect(firstAnalysis).to.have.property('projectName');",
+							"        pm.expect(firstAnalysis).to.have.property('projectDescription');",
+							"        pm.expect(firstAnalysis).to.have.property('fileName');",
+							"        pm.expect(firstAnalysis).to.have.property('uploadDate');",
+							"        pm.expect(firstAnalysis).to.have.property('status');",
+							"        pm.expect(firstAnalysis).to.have.property('summary');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/analysis?page=1&limit=10",
+					"host": ["{{base_url}}"],
+					"path": ["analysis"],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "Upload Analysis - No File",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message is correct\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('error');",
+							"    pm.expect(responseData.error).to.eql('No file uploaded');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "projectName",
+							"value": "Test Project",
+							"type": "text"
+						},
+						{
+							"key": "projectDescription",
+							"value": "Test project description",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/analysis/upload",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "upload"]
+				}
+			}
+		},
+		{
+			"name": "Upload Analysis - Missing Project Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message is correct\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('error');",
+							"    pm.expect(responseData.error).to.eql('Project name and description are required');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/path/to/your/test.fasta"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/analysis/upload",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "upload"]
+				}
+			}
+		},
+		{
+			"name": "Get Analysis - Invalid ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is correct\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('error');",
+							"    pm.expect(responseData.error).to.eql('Analysis not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/analysis/invalid_id",
+					"host": ["{{base_url}}"],
+					"path": ["analysis", "invalid_id"]
+				}
+			}
+		}
+	]
+}

@@ -12,6 +12,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const { projectName, projectDescription } = req.body;
+    if (!projectName || !projectDescription) {
+      return res.status(400).json({ error: 'Project name and description are required' });
+    }
+
     const fileContent = req.file.buffer.toString('utf-8');
     const fileName = req.file.originalname;
     const fileSize = req.file.size;
@@ -30,6 +35,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     // Create analysis record
     const analysis = new Analysis({
+      projectName,
+      projectDescription,
       fileName,
       fileSize,
       sequences: sequences.map(seq => ({
@@ -148,15 +155,33 @@ router.get('/:id/status', async (req, res) => {
   }
 });
 
-// List all analyses
+// List all analyses with pagination
 router.get('/', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalDocs = await Analysis.countDocuments();
+    const totalPages = Math.ceil(totalDocs / limit);
+
     const analyses = await Analysis.find(
       {}, 
-      'fileName uploadDate status summary'
-    ).sort({ uploadDate: -1 });
+      'projectName projectDescription fileName uploadDate status summary'
+    )
+    .sort({ uploadDate: -1 })
+    .skip(skip)
+    .limit(limit);
     
-    res.json(analyses);
+    res.json({
+      analyses,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalDocs,
+        itemsPerPage: limit
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
